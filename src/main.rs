@@ -24,8 +24,23 @@ impl Player {
 
     fn update(&mut self) {
         if is_key_down(KeyCode::W) {
-            self.y_vel = -5.0;
+            self.y_vel = -500.0;
+        } else if is_key_down(KeyCode::S) {
+            self.y_vel = 500.0;
+        } else {
+            self.y_vel = 0.0;
         }
+
+        if is_key_down(KeyCode::A) {
+            self.x_vel = -500.0;
+        } else if is_key_down(KeyCode::D) {
+            self.x_vel = 500.0;
+        } else {
+            self.x_vel = 0.0;
+        }
+
+        self.x += (self.x_vel * get_frame_time()) as i32;
+        self.y += (self.y_vel * get_frame_time()) as i32;
     }
 }
 
@@ -64,11 +79,13 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf())]
 async fn main() {
-    let game = GameState::new();
+    let mut game = GameState::new();
 
     set_window_position(1920 / 2 - 200, 1080 / 2 - 200);
 
     loop {
+        game.update();
+
         clear_background(BLACK);
 
         game.draw();
