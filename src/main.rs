@@ -59,6 +59,7 @@ struct GameState {
 impl GameState {
     async fn new() -> Self {
         let texture = load_texture("assets/player.png").await.unwrap();
+        texture.set_filter(FilterMode::Nearest);
         Self {
             player: Player::new(screen_width() / 2.0, screen_height() / 2.0, texture),
         }
