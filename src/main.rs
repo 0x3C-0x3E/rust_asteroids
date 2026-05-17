@@ -1,46 +1,54 @@
 use macroquad::{miniquad::window::set_window_position, prelude::*};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct Player {
-    x: i32,
-    y: i32,
+    pos: Vec2,
+    vel: Vec2,
 
-    x_vel: f32,
-    y_vel: f32,
+    texture: Texture2D,
+
+    rot: f32,
 }
 
 impl Player {
-    fn new(x: i32, y: i32) -> Self {
+    fn new(x: f32, y: f32, texture: Texture2D) -> Self {
         Self {
-            x,
-            y,
-            ..Default::default()
+            pos: Vec2::new(x, y),
+            texture: texture,
+            vel: Vec2::ZERO,
+            rot: 0.0,
         }
     }
 
     fn draw(&self) {
-        draw_circle(self.x as f32, self.y as f32, 10.0, RED);
+        let params = DrawTextureParams {
+            dest_size: Some(vec2(16.0 * 4.0, 16.0 * 4.0)),
+            source: Some(Rect::new(16.0, 0.0, 16.0, 16.0)),
+            rotation: self.rot,
+            ..Default::default()
+        };
+        draw_texture_ex(&self.texture, self.pos.x, self.pos.y, WHITE, params);
     }
 
     fn update(&mut self) {
         if is_key_down(KeyCode::W) {
-            self.y_vel = -500.0;
+            self.vel.y = -500.0;
         } else if is_key_down(KeyCode::S) {
-            self.y_vel = 500.0;
+            self.vel.y = 500.0;
         } else {
-            self.y_vel = 0.0;
+            self.vel.y = 0.0;
         }
 
         if is_key_down(KeyCode::A) {
-            self.x_vel = -500.0;
+            self.vel.x = -500.0;
         } else if is_key_down(KeyCode::D) {
-            self.x_vel = 500.0;
+            self.vel.x = 500.0;
         } else {
-            self.x_vel = 0.0;
+            self.vel.x = 0.0;
         }
 
-        self.x += (self.x_vel * get_frame_time()) as i32;
-        self.y += (self.y_vel * get_frame_time()) as i32;
+        self.pos.x += self.vel.x * get_frame_time();
+        self.pos.y += self.vel.y * get_frame_time();
     }
 }
 
@@ -49,12 +57,10 @@ struct GameState {
 }
 
 impl GameState {
-    fn new() -> Self {
+    async fn new() -> Self {
+        let texture = load_texture("assets/player.png").await.unwrap();
         Self {
-            player: Player::new(
-                (screen_width() / 2.0) as i32,
-                (screen_height() / 2.0) as i32,
-            ),
+            player: Player::new(screen_width() / 2.0, screen_height() / 2.0, texture),
         }
     }
 
@@ -73,15 +79,16 @@ fn window_conf() -> Conf {
         window_width: 400,
         window_height: 400,
         window_resizable: false,
+        sample_count: 1,
         ..Default::default()
     }
 }
 
 #[macroquad::main(window_conf())]
 async fn main() {
-    let mut game = GameState::new();
-
     set_window_position(1920 / 2 - 200, 1080 / 2 - 200);
+    set_default_filter_mode(FilterMode::Nearest);
+    let mut game = GameState::new().await;
 
     loop {
         game.update();
