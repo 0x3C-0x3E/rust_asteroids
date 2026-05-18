@@ -58,20 +58,36 @@ impl Entity for Player {
         self.pos.x += f32::cos(self.rot) * self.vel * get_frame_time();
         self.pos.y += f32::sin(self.rot) * self.vel * get_frame_time();
 
-        if self.pos.x + 16.0 * SCALE < 0.0 {
-            self.pos.x = screen_width();
+        self.wrap();
+    }
+}
+
+pub trait Wrappable {
+    fn constraints(&mut self) -> (&mut Vec2, f32);
+
+    fn wrap(&mut self) {
+        let (pos, size) = self.constraints();
+
+        if pos.x + size * SCALE < 0.0 {
+            pos.x = screen_width();
         }
 
-        if self.pos.x - 16.0 * SCALE > screen_width() {
-            self.pos.x = 0.0;
+        if pos.x - size * SCALE > screen_width() {
+            pos.x = 0.0;
         }
 
-        if self.pos.y + 16.0 * SCALE < 0.0 {
-            self.pos.y = screen_height();
+        if pos.y + size * SCALE < 0.0 {
+            pos.y = screen_height();
         }
 
-        if self.pos.y - 16.0 * SCALE > screen_height() {
-            self.pos.y = 0.0;
+        if pos.y - size * SCALE > screen_height() {
+            pos.y = 0.0;
         }
+    }
+}
+
+impl Wrappable for Player {
+    fn constraints(&mut self) -> (&mut Vec2, f32) {
+        (&mut self.pos, 16.0)
     }
 }

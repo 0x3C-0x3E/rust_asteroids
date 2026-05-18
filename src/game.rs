@@ -1,25 +1,33 @@
 use std::f32::consts::FRAC_PI_2;
 
-use crate::{SCALE, player::Player};
+use crate::{SCALE, enemy::Enemy, player::Player};
 use macroquad::prelude::*;
 
 pub struct GameState {
     player: Player,
+    enemies: Vec<Enemy>,
     bg_texture: Texture2D,
+
+    enemy_texture: Texture2D,
 }
 
 impl GameState {
     pub async fn new() -> Self {
         let player_texture = load_texture("assets/player.png").await.unwrap();
-        let bg_texture = load_texture("assets/bg.png").await.unwrap();
         Self {
             player: Player::new(
                 screen_width() / 2.0 - 16.0 * SCALE * 0.5,
                 screen_height() / 2.0 - 16.0 * SCALE * 0.5,
                 player_texture,
             ),
-            bg_texture: bg_texture,
+            enemies: Vec::new(),
+            bg_texture: load_texture("assets/bg.png").await.unwrap(),
+            enemy_texture: load_texture("assets/enemy.png").await.unwrap(),
         }
+    }
+
+    fn spawn_enemy(&mut self) {
+        self.enemies.push(Enemy::new(0, 0, enemy_texture));
     }
 
     fn draw_bg(&self) {
@@ -46,10 +54,16 @@ impl GameState {
 
     pub fn draw(&self) {
         self.draw_bg();
+        for enemy in self.enemies.iter() {
+            enemy.draw();
+        }
         self.player.draw();
     }
 
     pub fn update(&mut self) {
+        for enemy in self.enemies.iter_mut() {
+            enemy.draw();
+        }
         self.player.update();
     }
 }
