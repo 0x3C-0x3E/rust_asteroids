@@ -38,6 +38,13 @@ impl GameState {
         }
     }
 
+    pub fn spawn_enemy(&mut self) {
+        self.enemies.push(Enemy::new(
+            fastrand::f32() * screen_width(),
+            fastrand::f32() * screen_height(),
+        ));
+    }
+
     fn draw_bg(&self) {
         let tiles_x: u32 = (screen_width() / (64.0 * SCALE) + 1.0) as u32;
         let tiles_y: u32 = (screen_height() / (64.0 * SCALE) + 1.0) as u32;
@@ -69,6 +76,8 @@ impl GameState {
     }
 
     pub fn update(&mut self) {
+        self.spawn_enemy();
+
         for enemy in self.enemies.iter_mut() {
             enemy.update();
         }

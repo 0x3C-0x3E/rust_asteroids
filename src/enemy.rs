@@ -16,8 +16,8 @@ impl Enemy {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             pos: Vec2::new(x, y),
-            vel: 0.0,
-            rot: 0.0,
+            vel: fastrand::f32() * 150.0 + 50.0,
+            rot: fastrand::f32() * PI,
         }
     }
 }
@@ -34,8 +34,6 @@ impl Entity for Enemy {
     }
 
     fn update(&mut self) {
-        self.vel = 500.0;
-
         self.pos.x += f32::cos(self.rot) * self.vel * get_frame_time();
         self.pos.y += f32::sin(self.rot) * self.vel * get_frame_time();
 
