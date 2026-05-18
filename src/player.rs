@@ -7,6 +7,7 @@ use macroquad::prelude::*;
 pub struct Player {
     pos: Vec2,
     vel: f32,
+    acc: f32,
 
     texture: Texture2D,
 
@@ -19,6 +20,7 @@ impl Player {
             pos: Vec2::new(x, y),
             texture: texture,
             vel: 0.0,
+            acc: 0.0,
             rot: 0.0,
         }
     }
@@ -37,11 +39,11 @@ impl Entity for Player {
 
     fn update(&mut self) {
         if is_key_down(KeyCode::W) {
-            self.vel = 500.0;
+            self.acc = 5000.0;
         } else if is_key_down(KeyCode::S) {
-            self.vel = -500.0;
+            self.acc = -5000.0;
         } else {
-            self.vel = 0.0;
+            self.acc = 0.0;
         }
 
         if is_key_down(KeyCode::A) {
@@ -50,7 +52,26 @@ impl Entity for Player {
             self.rot += 5.0 * get_frame_time();
         }
 
+        self.vel += self.acc * get_frame_time() * 0.8;
+        self.vel = self.vel.clamp(-800.0, 800.0);
+
         self.pos.x += f32::cos(self.rot) * self.vel * get_frame_time();
         self.pos.y += f32::sin(self.rot) * self.vel * get_frame_time();
+
+        if self.pos.x + 16.0 * SCALE < 0.0 {
+            self.pos.x = screen_width();
+        }
+
+        if self.pos.x - 16.0 * SCALE > screen_width() {
+            self.pos.x = 0.0;
+        }
+
+        if self.pos.y + 16.0 * SCALE < 0.0 {
+            self.pos.y = screen_height();
+        }
+
+        if self.pos.y - 16.0 * SCALE > screen_height() {
+            self.pos.y = 0.0;
+        }
     }
 }
