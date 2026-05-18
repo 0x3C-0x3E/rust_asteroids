@@ -24,6 +24,7 @@ pub struct GameState {
     enemies: Vec<Enemy>,
 
     textures: Textures,
+    spawn_counter: f32,
 }
 
 impl GameState {
@@ -35,6 +36,7 @@ impl GameState {
             ),
             enemies: Vec::new(),
             textures: Textures::new().await,
+            spawn_counter: 0.0,
         }
     }
 
@@ -73,10 +75,16 @@ impl GameState {
             enemy.draw(&self.textures.enemy_texture);
         }
         self.player.draw(&self.textures.player_texture);
+
+        draw_text(&format!("{}", get_fps()), 50.0, 50.0, 50.0, WHITE);
     }
 
     pub fn update(&mut self) {
-        self.spawn_enemy();
+        self.spawn_counter += 1.0 * get_frame_time();
+        if self.spawn_counter >= 1.0 {
+            self.spawn_counter = 0.0;
+            self.spawn_enemy();
+        }
 
         for enemy in self.enemies.iter_mut() {
             enemy.update();

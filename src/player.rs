@@ -36,9 +36,9 @@ impl Entity for Player {
 
     fn update(&mut self) {
         if is_key_down(KeyCode::W) {
-            self.acc = 5000.0;
+            self.acc = 2000.0;
         } else if is_key_down(KeyCode::S) {
-            self.acc = -5000.0;
+            self.acc = -2000.0;
         } else {
             self.acc = 0.0;
         }
