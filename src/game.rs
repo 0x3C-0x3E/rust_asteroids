@@ -113,11 +113,15 @@ impl GameState {
             enemy.update();
         }
 
-        let hits: Vec<usize> = self
-            .bullets
-            .iter()
-            .filter_map(|bullet| bullet.get_enemy_collision(&self.enemies))
-            .collect();
+        let mut hits: Vec<usize> = vec![];
+        self.bullets.retain(|bullet| {
+            if let Some(i) = bullet.get_enemy_collision(&self.enemies) {
+                hits.push(i);
+                true
+            } else {
+                false
+            }
+        });
 
         for hit in hits.iter().rev() {
             self.enemies.remove(*hit);
