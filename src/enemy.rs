@@ -4,21 +4,31 @@ use crate::game::Entity;
 use crate::player::Wrappable;
 use macroquad::prelude::*;
 
+const LIFETIME: f32 = 4.0;
+
 #[derive(Debug)]
 pub struct Enemy {
     pos: Vec2,
     vel: f32,
 
     rot: f32,
+
+    life_timer: f32,
 }
 
 impl Enemy {
     pub fn new(x: f32, y: f32) -> Self {
         Self {
             pos: Vec2::new(x, y),
-            vel: fastrand::f32() * 150.0 + 50.0,
+            vel: fastrand::f32() * 80.0 + 50.0,
             rot: fastrand::f32() * PI,
+            life_timer: 0.0,
         }
+    }
+
+    pub fn tick(&mut self) -> bool {
+        self.life_timer += 1.0 * get_frame_time();
+        self.life_timer <= LIFETIME
     }
 }
 
@@ -38,6 +48,10 @@ impl Entity for Enemy {
         self.pos.y += f32::sin(self.rot) * self.vel * get_frame_time();
 
         self.wrap();
+    }
+
+    fn get_pos(&self) -> (f32, f32) {
+        (self.pos.x, self.pos.y)
     }
 }
 

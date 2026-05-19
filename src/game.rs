@@ -1,12 +1,13 @@
 use std::f32::consts::FRAC_PI_2;
 
-use crate::{SCALE, enemy::Enemy, player::Player};
+use crate::{SCALE, bullet::Bullet, enemy::Enemy, player::Player};
 use macroquad::prelude::*;
 
 pub struct Textures {
     player_texture: Texture2D,
     bg_texture: Texture2D,
     enemy_texture: Texture2D,
+    bullet_texture: Texture2D,
 }
 
 impl Textures {
@@ -15,6 +16,7 @@ impl Textures {
             player_texture: load_texture("assets/player.png").await.unwrap(),
             bg_texture: load_texture("assets/bg.png").await.unwrap(),
             enemy_texture: load_texture("assets/enemy.png").await.unwrap(),
+            bullet_texture: load_texture("assets/bullets.png").await.unwrap(),
         }
     }
 }
@@ -22,6 +24,7 @@ impl Textures {
 pub struct GameState {
     player: Player,
     enemies: Vec<Enemy>,
+    bullets: Vec<Bullet>,
 
     textures: Textures,
     spawn_counter: f32,
@@ -35,6 +38,7 @@ impl GameState {
                 screen_height() / 2.0 - 16.0 * SCALE * 0.5,
             ),
             enemies: Vec::new(),
+            bullets: Vec::new(),
             textures: Textures::new().await,
             spawn_counter: 0.0,
         }
@@ -44,6 +48,14 @@ impl GameState {
         self.enemies.push(Enemy::new(
             fastrand::f32() * screen_width(),
             fastrand::f32() * screen_height(),
+        ));
+    }
+
+    fn spawn_bullet(&mut self) {
+        self.bullets.push(Bullet::new(
+            self.player.get_pos().0,
+            self.player.get_pos().1,
+            self.player.get_rot(),
         ));
     }
 
@@ -74,9 +86,12 @@ impl GameState {
         for enemy in self.enemies.iter() {
             enemy.draw(&self.textures.enemy_texture);
         }
-        self.player.draw(&self.textures.player_texture);
 
-        draw_text(&format!("{}", get_fps()), 50.0, 50.0, 50.0, WHITE);
+        for bullet in self.bullets.iter() {
+            bullet.draw(&self.textures.bullet_texture);
+        }
+
+        self.player.draw(&self.textures.player_texture);
     }
 
     pub fn update(&mut self) {
@@ -86,9 +101,30 @@ impl GameState {
             self.spawn_enemy();
         }
 
+        if self.player.should_shoot() {
+            self.spawn_bullet();
+        }
+
+        for bullet in self.bullets.iter_mut() {
+            bullet.update();
+        }
+
         for enemy in self.enemies.iter_mut() {
             enemy.update();
         }
+
+        let hits: Vec<usize> = self
+            .bullets
+            .iter()
+            .filter_map(|bullet| bullet.get_enemy_collision(&self.enemies))
+            .collect();
+
+        for hit in hits.iter().rev() {
+            self.enemies.remove(*hit);
+        }
+
+        self.enemies.retain_mut(|e| e.tick());
+
         self.player.update();
     }
 }
@@ -96,4 +132,6 @@ impl GameState {
 pub trait Entity {
     fn draw(&self, texture: &Texture2D);
     fn update(&mut self);
+
+    fn get_pos(&self) -> (f32, f32);
 }

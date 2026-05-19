@@ -3,6 +3,9 @@ use crate::SCALE;
 use crate::game::Entity;
 use macroquad::prelude::*;
 
+const ACCELERATION: f32 = 500.0;
+const MAX_VEL: f32 = 300.0;
+
 #[derive(Debug)]
 pub struct Player {
     pos: Vec2,
@@ -21,6 +24,14 @@ impl Player {
             rot: 0.0,
         }
     }
+
+    pub fn should_shoot(&self) -> bool {
+        is_key_pressed(KeyCode::Space)
+    }
+
+    pub fn get_rot(&self) -> f32 {
+        self.rot
+    }
 }
 
 impl Entity for Player {
@@ -36,9 +47,9 @@ impl Entity for Player {
 
     fn update(&mut self) {
         if is_key_down(KeyCode::W) {
-            self.acc = 2000.0;
+            self.acc = ACCELERATION;
         } else if is_key_down(KeyCode::S) {
-            self.acc = -2000.0;
+            self.acc = -ACCELERATION;
         } else {
             self.acc = 0.0;
         }
@@ -50,12 +61,16 @@ impl Entity for Player {
         }
 
         self.vel += self.acc * get_frame_time() * 0.8;
-        self.vel = self.vel.clamp(-800.0, 800.0);
+        self.vel = self.vel.clamp(-MAX_VEL, MAX_VEL);
 
         self.pos.x += f32::cos(self.rot) * self.vel * get_frame_time();
         self.pos.y += f32::sin(self.rot) * self.vel * get_frame_time();
 
         self.wrap();
+    }
+
+    fn get_pos(&self) -> (f32, f32) {
+        (self.pos.x, self.pos.y)
     }
 }
 
