@@ -13,6 +13,7 @@ pub struct Player {
     acc: f32,
 
     rot: f32,
+    direction: i32,
 }
 
 impl Player {
@@ -22,6 +23,7 @@ impl Player {
             vel: 0.0,
             acc: 0.0,
             rot: 0.0,
+            direction: 0,
         }
     }
 
@@ -38,7 +40,12 @@ impl Entity for Player {
     fn draw(&self, texture: &Texture2D) {
         let params = DrawTextureParams {
             dest_size: Some(vec2(16.0 * SCALE, 16.0 * SCALE)),
-            source: Some(Rect::new(16.0, 0.0, 16.0, 16.0)),
+            source: Some(Rect::new(
+                16.0 + 16.0 * self.direction as f32,
+                0.0,
+                16.0,
+                16.0,
+            )),
             rotation: self.rot + PI * 0.5,
             ..Default::default()
         };
@@ -55,9 +62,13 @@ impl Entity for Player {
         }
 
         if is_key_down(KeyCode::A) {
+            self.direction = -1;
             self.rot -= 5.0 * get_frame_time();
         } else if is_key_down(KeyCode::D) {
+            self.direction = 1;
             self.rot += 5.0 * get_frame_time();
+        } else {
+            self.direction = 0;
         }
 
         self.vel += self.acc * get_frame_time() * 0.8;
