@@ -23,7 +23,7 @@ impl Bullet {
     pub fn new(x: f32, y: f32, rot: f32) -> Self {
         Self {
             pos: Vec2 { x, y },
-            vel: 400.0,
+            vel: 600.0,
             rot: rot,
             ..Default::default()
         }

@@ -117,17 +117,15 @@ impl GameState {
         self.bullets.retain(|bullet| {
             if let Some(i) = bullet.get_enemy_collision(&self.enemies) {
                 hits.push(i);
-                true
-            } else {
                 false
+            } else {
+                true
             }
         });
 
         for hit in hits.iter().rev() {
             self.enemies.remove(*hit);
         }
-
-        self.enemies.retain_mut(|e| e.tick());
 
         self.player.update();
     }
